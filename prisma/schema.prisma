@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum AuditStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model Client {
+  id             String   @id @default(cuid())
+  name           String
+  websiteUrl     String
+  businessType   String
+  city           String
+  state          String
+  contactEmail   String?
+  whatsappNumber String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  audits         Audit[]
+}
+
+model Audit {
+  id             String      @id @default(cuid())
+  clientId       String
+  status         AuditStatus @default(QUEUED)
+  progress       Int         @default(0)
+  currentStep    String?
+  overallScore   Int?
+  scoreBreakdown Json?
+  result         Json?
+  pdfPath        String?
+  errorMessage   String?
+  createdAt      DateTime    @default(now())
+  startedAt      DateTime?
+  completedAt    DateTime?
+  client         Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([status])
+}
