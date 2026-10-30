@@ -8,15 +8,15 @@
  * - Rendering model: Server-only module (worker process).
  *
  * Changes:
- * - New file.
+ * - REPORTS_DIR now comes from src/reports/paths.ts instead of being defined here.
+ * - PDF output and rendering logic are unchanged.
  *
  * Safety:
- * - Replaces Cloudflare R2 with /tmp/reports as the assessment document requires.
  * - The browser is always closed, even when rendering fails.
  * - The no-sandbox flag is used only on Linux, where servers usually run as root.
  *
  * Connected Modules:
- * - src/reports/report-template.ts, src/workers/audit-pipeline.ts
+ * - src/reports/report-template.ts, src/reports/paths.ts, src/workers/audit-pipeline.ts
  *
  * Dependencies:
  * - puppeteer: headless Chrome used to print HTML to PDF.
@@ -26,9 +26,8 @@
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import puppeteer from "puppeteer";
+import { REPORTS_DIR } from "@/reports/paths";
 import { buildReportHtml, type ReportInput } from "@/reports/report-template";
-
-export const REPORTS_DIR = "/tmp/reports";
 
 export async function generatePdfReport(
   auditId: string,
