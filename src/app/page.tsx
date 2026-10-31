@@ -1,28 +1,18 @@
 //#region File Documentation
 /**
  * File: src/app/page.tsx
- * Updated: 2026-10-30
- *
- * Purpose:
- * - Home route: sends visitors to the admin clients page.
- * - Rendering model: Server Component (server-side redirect).
- *
- * Changes:
- * - Replaced the generated starter page with a redirect to /admin/clients.
- *
- * Safety:
- * - No logic besides the redirect.
- *
- * Connected Modules:
- * - src/app/admin/clients/page.tsx
- *
- * Dependencies:
- * - None.
+ * Updated: 2026-10-31
+ * Purpose: Home route: sends visitors to the admin dashboard.
+ * Rendering model: Server Component (server-side redirect).
+ * Changes: Redirect target changed from /admin/clients to /admin.
+ * Safety: No logic besides the redirect.
+ * Connected Modules: src/app/admin/page.tsx
+ * Dependencies: None.
  */
 //#endregion
 
-import { redirect } from "next/navigation";
+import { redirect } from 'next/navigation';
 
 export default function HomePage() {
-  redirect("/admin/clients");
+  redirect('/admin');
 }
