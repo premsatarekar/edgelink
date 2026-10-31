@@ -8,16 +8,16 @@
  * - Rendering model: Server Component (renders the AuditControls client component inside).
  *
  * Changes:
- * - The latest-audit area now uses AuditControls (Run audit button and live progress).
- * - The key on AuditControls resets its state when the latest audit changes after a refresh.
- * - Layout, empty state and client details are unchanged.
+ * - Under the audit controls there are now links: "View report" (latest audit) and "Client dashboard".
+ * - Layout, empty state, client details and the Run audit controls are unchanged.
  *
  * Safety:
  * - Long names and URLs wrap, so the page never scrolls sideways.
  * - External site links open in a new tab with rel="noopener noreferrer".
  *
  * Connected Modules:
- * - src/components/admin/audit-controls.tsx, src/data/admin-copy.ts, src/types/client.ts
+ * - src/components/admin/audit-controls.tsx, src/data/admin-copy.ts, src/data/audit-copy.ts,
+ *   src/types/client.ts, /admin/audits/[id], /dashboard/[clientId]
  *
  * Dependencies:
  * - None.
@@ -26,11 +26,16 @@
 
 import { AuditControls } from '@/components/admin/audit-controls';
 import { adminCopy } from '@/data/admin-copy';
+import { auditCopy } from '@/data/audit-copy';
 import type { ClientListItem } from '@/types/client';
+import Link from 'next/link';
 
 interface ClientsListProps {
   clients: ClientListItem[];
 }
+
+const TEXT_LINK_CLASS =
+  'inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-2';
 
 function ClientIdentity({ client }: { client: ClientListItem }) {
   return (
@@ -50,13 +55,26 @@ function ClientIdentity({ client }: { client: ClientListItem }) {
 
 function ClientAuditControls({ client }: { client: ClientListItem }) {
   const audit = client.latestAudit;
+
   return (
-    <AuditControls
-      key={`${client.id}-${audit?.id ?? 'none'}-${audit?.status ?? 'none'}`}
-      clientId={client.id}
-      clientName={client.name}
-      latestAudit={audit}
-    />
+    <div className="space-y-1">
+      <AuditControls
+        key={`${client.id}-${audit?.id ?? 'none'}-${audit?.status ?? 'none'}`}
+        clientId={client.id}
+        clientName={client.name}
+        latestAudit={audit}
+      />
+      <div className="flex flex-wrap items-center gap-x-4">
+        {audit ? (
+          <Link href={`/admin/audits/${audit.id}`} className={TEXT_LINK_CLASS}>
+            {auditCopy.viewReport}
+          </Link>
+        ) : null}
+        <Link href={`/dashboard/${client.id}`} className={TEXT_LINK_CLASS}>
+          {auditCopy.clientDashboard}
+        </Link>
+      </div>
+    </div>
   );
 }
 

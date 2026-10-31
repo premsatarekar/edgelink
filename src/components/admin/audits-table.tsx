@@ -8,23 +8,26 @@
  * - Rendering model: Server Component (no hooks).
  *
  * Changes:
- * - New file.
+ * - The Report column now has a "View report" link to the audit detail page next to the PDF link.
+ * - Everything else is unchanged.
  *
  * Safety:
  * - Dates are formatted in Asia/Kolkata so server and viewer always see the same time.
  * - Long text wraps, so the page never scrolls sideways.
  *
  * Connected Modules:
- * - src/components/admin/status-badge.tsx, src/data/admin-copy.ts, src/types/audit-list.ts,
- *   /api/audits/[id]/pdf
+ * - src/components/admin/status-badge.tsx, src/data/admin-copy.ts, src/data/audit-copy.ts,
+ *   src/types/audit-list.ts, /admin/audits/[id], /api/audits/[id]/pdf
  *
  * Dependencies:
  * - None.
  */
 //#endregion
 
+import Link from "next/link";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { adminCopy } from "@/data/admin-copy";
+import { auditCopy } from "@/data/audit-copy";
 import type { AuditListItem } from "@/types/audit-list";
 
 interface AuditsTableProps {
@@ -36,6 +39,9 @@ const dateFormatter = new Intl.DateTimeFormat("en-IN", {
   timeStyle: "short",
   timeZone: "Asia/Kolkata",
 });
+
+const REPORT_LINK_CLASS =
+  "inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-2";
 
 function formatDate(iso: string): string {
   return dateFormatter.format(new Date(iso));
@@ -74,17 +80,18 @@ function AuditScore({ audit }: { audit: AuditListItem }) {
   );
 }
 
-function AuditReport({ audit }: { audit: AuditListItem }) {
-  if (!audit.hasPdf) {
-    return <span className="text-sm text-muted-foreground">{adminCopy.audits.noReport}</span>;
-  }
+function AuditReportLinks({ audit }: { audit: AuditListItem }) {
   return (
-    <a
-      href={`/api/audits/${audit.id}/pdf`}
-      className="inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-2"
-    >
-      {adminCopy.audits.downloadPdf}
-    </a>
+    <div className="flex flex-wrap items-center gap-x-4">
+      <Link href={`/admin/audits/${audit.id}`} className={REPORT_LINK_CLASS}>
+        {auditCopy.viewReport}
+      </Link>
+      {audit.hasPdf ? (
+        <a href={`/api/audits/${audit.id}/pdf`} className={REPORT_LINK_CLASS}>
+          {adminCopy.audits.downloadPdf}
+        </a>
+      ) : null}
+    </div>
   );
 }
 
@@ -107,16 +114,16 @@ export function AuditsTable({ audits }: AuditsTableProps) {
           <caption className="sr-only">{adminCopy.audits.tableCaption}</caption>
           <thead className="bg-muted text-left">
             <tr>
-              <th scope="col" className="w-[30%] px-4 py-3 font-medium">
+              <th scope="col" className="w-[26%] px-4 py-3 font-medium">
                 {adminCopy.audits.columns.client}
               </th>
-              <th scope="col" className="w-[22%] px-4 py-3 font-medium">
+              <th scope="col" className="w-[20%] px-4 py-3 font-medium">
                 {adminCopy.audits.columns.status}
               </th>
               <th scope="col" className="w-[10%] px-4 py-3 font-medium">
                 {adminCopy.audits.columns.score}
               </th>
-              <th scope="col" className="w-[20%] px-4 py-3 font-medium">
+              <th scope="col" className="w-[18%] px-4 py-3 font-medium">
                 {adminCopy.audits.columns.started}
               </th>
               <th scope="col" className="px-4 py-3 font-medium">
@@ -138,7 +145,7 @@ export function AuditsTable({ audits }: AuditsTableProps) {
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">{formatDate(audit.createdAt)}</td>
                 <td className="px-4 py-1">
-                  <AuditReport audit={audit} />
+                  <AuditReportLinks audit={audit} />
                 </td>
               </tr>
             ))}
@@ -155,7 +162,7 @@ export function AuditsTable({ audits }: AuditsTableProps) {
               <AuditScore audit={audit} />
             </div>
             <p className="text-xs text-muted-foreground">{formatDate(audit.createdAt)}</p>
-            <AuditReport audit={audit} />
+            <AuditReportLinks audit={audit} />
           </li>
         ))}
       </ul>
